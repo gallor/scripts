@@ -75,7 +75,7 @@ git clone https://github.com/rockandska/fzf-obc ${INSTALL_PATH}
 echo "==> Installing NVM"
 curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
 source ~/.bashrc
-nvim install --lts
+nvim install node
 npm install --global yarn
 
 echo "==> Installing Neovim"
@@ -100,8 +100,8 @@ echo "==> Installing VsCode SSH"
 sudo apt-get install openssh-server
 
 echo "==> Installing Python Neovim support"
-pip install --user neovim
-yarn global add neovim
+pip3 install --user pynvim
+npm install --global neovim
 
 # set up docker
 echo "Install Docker"
@@ -118,17 +118,17 @@ sudo docker run hello-world
 
 # Docket Compose
 echo "Install Docker Compose"
-sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo curl "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 
 # Install Nerd Font
-echo "[-] Install Nerd Font Inconsolata [-]"
-echo "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/inconsolata.zip"
-wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/inconsolata.zip
+echo "==> Install Nerd Font Inconsolata"
 if [[ ! -d ~/.local/share/fonts ]]; then
     mkdir -p ~/.local/share/fonts
 fi
-unzip inconsolata.zip -d ~/.local/share/fonts
+echo "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Inconsolata.zip"
+wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Inconsolata.zip -O Inconsolata.zip
+unzip Inconsolata.zip -d ~/.local/share/fonts
 rm -rf inconsolata.zip
 fc-cache -fv
 echo "done!"

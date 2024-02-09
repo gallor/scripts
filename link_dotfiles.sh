@@ -1,18 +1,31 @@
-#!/usr/bin/bash
+#!/bin/bash
 
-SCRIPT=$(realpath -s "$0")
-SCRIPTPATH=$(dirname "$SCRIPT")
+DIRECTORY=$0
+if [[ -z $DIRECTORY ]]; then
+    echo "Valid directory of dotfiles must be provided
+    Using Default directory of $HOME/Documents/code/dotfiles
+    "
+    DIRECTORY="$HOME/Documents/code/dotfiles"
+fi
+echo "Using dotfiles in $HOME"
+
+read confirm -p "This may overwrite existing files in your home directory. Are you sure? (y/n) " -n 1
+echo ""
+if [[ $confirm =~ ^[Yy]$ ]]; then
+    syncDotfiles
+    syncNeovimAndRG
+fi;
 
 function syncDotfiles() {
-    FILES="$(ls -a)"
+    read -p
+    FILES="$(ls -a $DIRECTORY)"
     echo $FILES
     for f in $FILES; do
-    if [ -d $f ]; then
-      echo "Directory ${f}, skipping"
+    if [[ -d $f ]]; then
+      echo "Directory $f, skipping"
     else
-      if [ $f != "setup.sh" ]; then
-        ln -s ${SCRIPTPATH}/${f} ${HOME}/$f
-      fi
+        ln -s $DIRECTORY/$f $HOME/$f
+	echo "Linked $f"
     fi
     done
 }
@@ -21,22 +34,11 @@ function syncNeovimAndRG() {
     if [[ ! -d ~/.config ]]; then
         mkdir -p ~/.config
     fi
-    ln -s ${SCRIPTPATH}/nvim ${HOME}/.config/nvm
-    ln -s ${SCRIPTPATH}/ripgrep ${HOME}/.confg/ripgrp
+    ln -s $DIRECTORY/nvim $HOME/.config/nvm
+    ln -s $DIRECTORY/ripgrep $HOME/.confg/ripgrp
 }
 
-if [ "$1" == "--force" -o "$1" == "-f" ]; then
-	syncDotfiles;
-	syncNeovimAndRG;
-else
-    read -p "This may overwrite existing files in your home directory. Are you sure? (y/n) " -n 1;
-    echo "";
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-      syncDotfiles;
-      syncNeovimAndRG;
-    fi;
-fi;
 
 
-unset doIt;
-unset syncNeovim;
+unset syncDotFiles;
+unset syncNeovimAndRG;
