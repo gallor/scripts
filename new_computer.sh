@@ -2,24 +2,37 @@
 
 set -e
 
+SKIP=''
+
+while getopts "s" o; do
+case $o in
+    s)
+        SKIP="true"
+        ;;
+    esac
+done
+
 if [[ ! -d ~/Documents/code ]]; then
   mkdir ~/Documents/code
 fi
 cd ~/Documents/code
 
+if [[ -z $SKIP ]]; then
 # Homebrew
-echo "===> Install Homebrew and brewing Git"
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install git
+  echo "===> Install Homebrew and brewing Git"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  brew install git
 
-git clone https://github.com/gallor/scripts.git
-git clone https://github.com/gallor/dotfiles.git
-cd ~/Documents/code/scripts
-brew bundle
-brew upgrade
+  git clone https://github.com/gallor/scripts.git
+  git clone https://github.com/gallor/dotfiles.git
+  cd ~/Documents/code/scripts
+  brew bundle
+  brew upgrade
+fi
 
 echo "===> Linking Dotfiles"
-. ./link_dotfiles ~/Documents/code/dotfiles
+chmod +x ~/Documents/code/scripts/link_dotfiles.sh
+. ~/Documents/code/scripts/link_dotfiles.sh ~/Documents/code/dotfiles
 
 echo "===> Installing VimPlug"
 # Vim Plug
