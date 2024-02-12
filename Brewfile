@@ -34,7 +34,7 @@ brew "docker-compose"
 brew "gcc"
 cask "google-chrome"
 cask "google-drive"
-cask "autodesk-fusion360", args: { appdir: "~/Applicationsd" }
+cask "autodesk-fusion", args: { appdir: "~/Applicationsd" }
 cask "appcleaner", args: { appdir: "~/Applications" }
 cask "authy", args: { appdir: "~/Applications" }
 cask "bettertouchtool", args: { appdir: "~/Applications" }
