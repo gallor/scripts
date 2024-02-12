@@ -32,6 +32,7 @@ brew "yarn"
 brew "docker"
 brew "docker-compose"
 brew "net-tools"
+brew "gcc"
 cask "google-chrome"
 cask "google-drive"
 cask "autodesk-fusion360", args: { appdir: "~/Applicationsd" }
