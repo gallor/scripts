@@ -53,3 +53,4 @@ cask "shottr", args: { appdir: "~/Applications" }
 cask "surfshark", args: { appdir: "~/Applications" }
 cask "visual-studio-code", args: { appdir: "~/Applications" }
 cask "ultimaker-cura", args: { appdir: "~/Applications" }
+cask "pronterface", args: { appdir: "~/Applications" }

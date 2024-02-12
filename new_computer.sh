@@ -2,11 +2,14 @@
 
 set -e
 
-mkdir ~/Documents/code
+if [[ ! -d ~/Documents/code ]]; then
+  mkdir ~/Documents/code
+fi
 cd ~/Documents/code
 
 # Homebrew
-curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+echo "===> Install Homebrew and brewing Git"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install git
 
 git clone https://github.com/gallor/scripts.git
@@ -43,6 +46,7 @@ echo "===> Installing Miniforge"
 # Conda/MiniForge
 curl -fsSLo Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-$(uname -m).sh"
 bash Miniforge3.sh -b -p "${HOME}/conda"
+rm -rf Miniforge3.sh
 source "${HOME}/conda/etc/profile.d/conda.sh"
 source "${HOME}/conda/etc/profile.d/mamba.sh"
 
@@ -63,7 +67,7 @@ echo "===> Installing Inconsolata Nerd Font"
 # Nerd Font
 wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Inconsolata.zip -O Inconsolata.zip
 unzip Inconsolata.zip -d ~/Library/Fonts
-rm -rf inconsolata.zip
+rm -rf Inconsolata.zip
 
 echo ""
 echo "If key repeat is not working in VSCode, run this command then restart VSCode:

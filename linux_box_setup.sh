@@ -36,7 +36,6 @@ sudo apt install \
     ca-certificates \
     gnupg \
     bat \
-    fzf \
     git-all \
     virtualbox \
     trash-cli \
