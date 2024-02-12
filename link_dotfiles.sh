@@ -22,7 +22,7 @@ function syncNeovimAndRG() {
         mkdir -p $HOME/.config
     fi
     ln -s $DIRECTORY/nvim $HOME/.config/nvm
-    ln -s $DIRECTORY/ripgrep $HOME/.confg/ripgrp
+    ln -s $DIRECTORY/ripgrep $HOME/.config/ripgrp
 }
 if [[ -z $DIRECTORY ]]; then
     echo "Valid directory of dotfiles must be provided
