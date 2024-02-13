@@ -47,12 +47,7 @@ curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/instal
 echo "===> Installing NVM"
 # NVM
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-cat << EOF >> ~/.zshrc
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-EOF
-
+source ~/.zshrc
 nvm install node
 
 echo "===> Installing Miniforge"
@@ -74,13 +69,17 @@ echo "===> Install Nvim Plugins"
 # Install Nvim Plugins
 npm install -g neovim
 npm install -g instant-markdown-d
-nvim -c PlugInstall -c q -c UpdateRemotePlugins -c q
+nvim -c PlugInstall -c q -c q
+nvim -c UpdateRemotePlugins -c q
 
 echo "===> Installing Inconsolata Nerd Font"
 # Nerd Font
 wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Inconsolata.zip -O Inconsolata.zip
 unzip Inconsolata.zip -d ~/Library/Fonts
 rm -rf Inconsolata.zip
+
+echo "===> Downloading Dracula for ITerm"
+wget https://github.com/dracula/iterm/archive/refs/heads/master.zip -O ~/Desktop/Dracula.zip
 
 echo ""
 echo "If key repeat is not working in VSCode, run this command then restart VSCode:
