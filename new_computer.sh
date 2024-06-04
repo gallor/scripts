@@ -40,19 +40,14 @@ sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.
        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 pip3 install pynvim
 
-# ZPlug
-echo "===> Installing ZPlug"
-curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
+# Antidote
+echo "===> Installing Antidote"
+git clone --depth=1 https://github.com/mattmc3/antidote.git ${ZDOTDIR:-~}/.antidote
 
 echo "===> Installing NVM"
 # NVM
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-cat << EOF >> ~/.zshrc
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-EOF
-
+source ~/.zshrc
 nvm install node
 
 echo "===> Installing Miniforge"
@@ -69,7 +64,7 @@ mamba install -c conda-forge -n base condax
 conda activate base
 mkdir -p ~/.local/bin && ln -s $(which condax) ~/.local/bin/condax
 condax install -c conda-forge pipx
-
+ Plugins
 echo "===> Install Nvim Plugins"
 # Install Nvim Plugins
 npm install -g neovim
@@ -93,6 +88,12 @@ echo "===> Installing Pydoro"
 # Global Pip Packages
 pipx install pydoro
 pip3 install "pydoro[audio]"
+
+
+echo "===> Installing iPython"
+pipx install ipython
+ipython profile create
+echo "c.TerminalInteractiveShell.editing_mode = 'vi'" >> ~/.ipython/profile_default/ipython_config.py
 
 echo "===> Installing Tmux Plugins"
 if [[ ! -d ~/.tmux/plugins/tpm ]]; then

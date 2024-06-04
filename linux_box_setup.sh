@@ -60,6 +60,12 @@ rm -rf MiniConda.sh
 
 if [[ $(which conda) ]]; then
     conda install mamba -n base -c conda-forge
+    mamba install -c conda-forge -n base condax
+    conda activate base
+    mkdir -p ~/.local/bin && ln -s $(which condax) ~/.local/bin/condax
+    condax install -c conda-forge pipx
+    pipx install ipython
+    ipython profile create
 fi
 
 

@@ -17,12 +17,13 @@ function syncDotfiles() {
     done
 }
 
-function syncNeovimAndRG() {
+function syncNeovimRGAndZsh() {
     if [[ ! -d ~/.config ]]; then
         mkdir -p $HOME/.config
     fi
     ln -s $DIRECTORY/nvim $HOME/.config/nvm
     ln -s $DIRECTORY/ripgrep $HOME/.config/ripgrp
+    ln -s $DIRECTORY/zsh $HOME/.zsh
 }
 if [[ -z $DIRECTORY ]]; then
     echo "Valid directory of dotfiles must be provided
@@ -34,10 +35,17 @@ echo "Using dotfiles in $DIRECTORY"
 read -n 1 -p "This may overwrite existing files in your home directory. Are you sure? (y/n) " confirm
 if [[ $confirm =~ ^[Yy]$ ]]; then
     syncDotfiles
-    syncNeovimAndRG
+    syncNeovimRGAndZsh
+    setupCompletion
 else
     exit 2
 fi;
 
+function setupCompletion() {
+    ln -s $DIRECTORY/zsh/.zshrc ~/.zshrc
+}
+
 unset syncDotFiles;
-unset syncNeovimAndRG;
+unset syncNeovimRGAndZsh;
+unset setupCompletion
+
