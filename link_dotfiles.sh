@@ -18,10 +18,10 @@ function syncDotfiles() {
 }
 
 function syncNeovimRGAndZsh() {
-    if [[ ! -d ~/.config ]]; then
+    if [[ ! -d $HOME/.config ]]; then
         mkdir -p $HOME/.config
     fi
-    ln -s $DIRECTORY/nvim $HOME/.config/nvm
+    ln -s $DIRECTORY/nvim $HOME/.config/nvim
     ln -s $DIRECTORY/ripgrep $HOME/.config/ripgrp
     ln -s $DIRECTORY/zsh $HOME/.zsh
 }

@@ -69,13 +69,17 @@ echo "===> Install Nvim Plugins"
 # Install Nvim Plugins
 npm install -g neovim
 npm install -g instant-markdown-d
-nvim -c PlugInstall -c q -c UpdateRemotePlugins -c q
+nvim -c PlugInstall -c q -c q
+nvim -c UpdateRemotePlugins -c q
 
 echo "===> Installing Inconsolata Nerd Font"
 # Nerd Font
 wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Inconsolata.zip -O Inconsolata.zip
 unzip Inconsolata.zip -d ~/Library/Fonts
 rm -rf Inconsolata.zip
+
+echo "===> Downloading Dracula for ITerm"
+wget https://github.com/dracula/iterm/archive/refs/heads/master.zip -O ~/Desktop/Dracula.zip
 
 echo ""
 echo "If key repeat is not working in VSCode, run this command then restart VSCode:
