@@ -5,16 +5,17 @@ zip=""
 filter=""
 tar=""
 
-_usage="
+_usage=$(cat <<EOF
+Usage: gitrepo -r <repo author/repo name> [-f] <filter> [-z] [-t]
+---
+-r      Repo owner/name (ie awesomeauthorsname/greatrepo)
+-f      Filter applied to the list of the repo's asset names.
+        If the filter doesn't match anything, none will be displayed
+-z      Download the zip file of the latest release
+-t      Download the tarball of the latest release
+EOF
+)
 
-    Usage: gitrepo -r <repo author/repo name> [-f] <filter> [-z] [-t]
-    ---
-    -r      Repo owner/name (ie awesomeauthorsname/greatrepo)
-    -f      Filter applied to the list of the repo's asset names.
-            If the filter doesn't match anything, none will be displayed
-    -z      Download the zip file of the latest release
-    -t      Download the tarball of the latest release
-"
 _prereqs="Script relies on Fzf for selection. Please install before continuing"
 
 if [[ -z $(which fzf) ]]; then
@@ -25,10 +26,10 @@ fi
 while getopts ":r:ftz:" o; do
 case $o in
     z)
-        zip="true"
+        zip=true
         ;;
     t)
-        tar="true"
+        tar=true
         ;;
     r)
         repo=${OPTARG}
@@ -37,12 +38,13 @@ case $o in
         filter=${OPTARG}
         ;;
     *)
-        echo $_usage
+        echo "$_usage"
+        exit 0
     esac
 done
 
 if [[ -z $repo ]]; then
-    $_usage
+    echo "$_usage"
 fi
 
 releases=$(curl -s https://api.github.com/repos/$repo/releases/latest)
