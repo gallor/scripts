@@ -101,5 +101,4 @@ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 echo "===> Installing Rust"
 curl https://sh.rustup.rs -sSf | sh
 
-zplug install
 source ~/.zshrc
