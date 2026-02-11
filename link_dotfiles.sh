@@ -22,7 +22,7 @@ function syncNeovimRGAndZsh() {
         mkdir -p $HOME/.config
     fi
     ln -s $DIRECTORY/nvim $HOME/.config/nvim
-    ln -s $DIRECTORY/ripgrep $HOME/.config/ripgrp
+    ln -s $DIRECTORY/ripgrep $HOME/.config/ripgrep
     ln -s $DIRECTORY/zsh $HOME/.zsh
 }
 if [[ -z $DIRECTORY ]]; then
@@ -42,7 +42,7 @@ else
 fi;
 
 function setupCompletion() {
-    ln -s $DIRECTORY/zsh/.zshrc ~/.zshrc
+    ln -s $DIRECTORY/zsh/.zshenv ~/.zshenv
 }
 
 unset syncDotFiles;

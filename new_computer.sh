@@ -44,27 +44,21 @@ pip3 install pynvim
 echo "===> Installing Antidote"
 git clone --depth=1 https://github.com/mattmc3/antidote.git ${ZDOTDIR:-~}/.antidote
 
-echo "===> Installing NVM"
-# NVM
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+echo "Installing Micromamba, conda, condax, and pipx"
+mkdir -f ~/.local/bin
+curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
+./micromamba shell init -s zsh -r ~/micromamba
 source ~/.zshrc
-nvm install node
+echo "conda_executable: \"$HOME/.local/bin/micromamba\"" > $HOME/.condaxrc
+micromamba create -y -n condax-toolenv condax -c conda-forge
+echo -e '#!/bin/bash\micromamba run -n condax-toolenv condax $@' > ~/.local/bin/condax && chmod +x ~/.local/bin/condax
+condax install conda
+conda install -y -n base conda-build
+condax install cruft -c conda-forge
+condax install pre-commit -c conda-forge
+condax install rattler-build
+condax install pipx -c conda-forge
 
-echo "===> Installing Miniforge"
-# Conda/MiniForge
-curl -fsSLo Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-$(uname -m).sh"
-bash Miniforge3.sh -b -p "${HOME}/conda"
-rm -rf Miniforge3.sh
-source "${HOME}/conda/etc/profile.d/conda.sh"
-source "${HOME}/conda/etc/profile.d/mamba.sh"
-
-source ~/.zshrc
-
-mamba install -c conda-forge -n base condax
-conda activate base
-mkdir -p ~/.local/bin && ln -s $(which condax) ~/.local/bin/condax
-condax install -c conda-forge pipx
- Plugins
 echo "===> Install Nvim Plugins"
 # Install Nvim Plugins
 npm install -g neovim
@@ -93,7 +87,6 @@ echo "===> Installing Pydoro"
 pipx install pydoro
 pip3 install "pydoro[audio]"
 
-
 echo "===> Installing iPython"
 pipx install ipython
 ipython profile create
@@ -105,6 +98,8 @@ if [[ ! -d ~/.tmux/plugins/tpm ]]; then
 fi
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
+echo "===> Installing Rust"
+curl https://sh.rustup.rs -sSf | sh
 
 zplug install
 source ~/.zshrc

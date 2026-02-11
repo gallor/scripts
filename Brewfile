@@ -1,56 +1,65 @@
 tap "homebrew/bundle"
-tap "homebrew/cask-versions"
 tap "tavianator/tap"
 brew "ack"
+brew "glib"
+brew "harfbuzz"
+brew "pango"
+brew "librsvg"
+brew "adwaita-icon-theme"
+brew "webp"
+brew "git"
+brew "asdf"
+brew "at-spi2-core"
+brew "bash"
 brew "bat"
-brew "coreutils"
-brew "tree-sitter"
 brew "cmake"
-brew "cmus"
-brew "ctags"
-brew "easy-tag"
-brew "fd"
+brew "gnutls"
+brew "libass"
+brew "libmicrohttpd"
+brew "librist"
+brew "tesseract"
 brew "ffmpeg"
+brew "cmus"
+brew "coreutils"
+brew "ctags"
+brew "curl"
+brew "docker"
+brew "gsettings-desktop-schemas"
+brew "easy-tag"
+brew "eza"
+brew "fd"
 brew "findutils"
 brew "fzf"
-brew "git"
+brew "gawk"
+brew "gcc"
 brew "gnu-sed"
+brew "gnupg"
+brew "grc"
+brew "grep"
+brew "handbrake"
 brew "htop"
-brew "webp"
 brew "imagemagick"
 brew "jq"
-brew "handbrake"
-brew "yt-dlp"
-brew "telnet"
-brew "ripgrep"
+brew "lesspipe"
+brew "luarocks"
 brew "neovim"
+brew "pandoc"
+brew "pipx"
+brew "reattach-to-user-namespace"
+brew "ripgrep"
+brew "telnet"
 brew "tmux"
-brew "trash"
+brew "trash-cli", link: true
 brew "tree"
+brew "tty-clock"
 brew "wget"
 brew "yarn"
-brew "docker"
-brew "docker-compose"
-brew "gcc"
-cask "google-chrome"
-cask "google-drive"
-cask "autodesk-fusion", args: { appdir: "~/Applicationsd" }
-cask "appcleaner", args: { appdir: "~/Applications" }
-cask "authy", args: { appdir: "~/Applications" }
+brew "yt-dlp"
 cask "bettertouchtool", args: { appdir: "~/Applications" }
-cask "bitwarden", args: { appdir: "~/Applications" }
-cask "calibre", args: { appdir: "~/Applications" }
 cask "dash3", args: { appdir: "~/Applications" }
-cask "insomnia", args: { appdir: "~/Applications" }
-cask "iterm2", args: { appdir: "~/Applications" }
-cask "keka", args: { appdir: "~/Applications" }
-cask "mockoon", args: { appdir: "~/Applications" }
-cask "ngrok", args: { appdir: "~/Applications" }
 cask "notion", args: { appdir: "~/Applications" }
+cask "obsidian", args: { appdir: "~/Applications" }
 cask "proxyman", args: { appdir: "~/Applications" }
 cask "shifty", args: { appdir: "~/Applications" }
 cask "shottr", args: { appdir: "~/Applications" }
-cask "surfshark", args: { appdir: "~/Applications" }
-cask "visual-studio-code", args: { appdir: "~/Applications" }
-cask "ultimaker-cura", args: { appdir: "~/Applications" }
-cask "pronterface", args: { appdir: "~/Applications" }
+cargo "paper-terminal"

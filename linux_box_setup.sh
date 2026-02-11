@@ -108,6 +108,9 @@ echo "==> Installing Python Neovim support"
 pip3 install --user pynvim
 npm install --global neovim
 
+echo "==> Installing Rust Cargo"
+curl https://sh.rustup.rs -sSf | sh
+
 # set up docker
 echo "Install Docker"
 sudo apt-get remove docker docker-engine docker.io containerd runc
@@ -131,9 +134,12 @@ echo "==> Install Nerd Font Inconsolata"
 if [[ ! -d ~/.local/share/fonts ]]; then
     mkdir -p ~/.local/share/fonts
 fi
-echo "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Inconsolata.zip"
-wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Inconsolata.zip -O Inconsolata.zip
-unzip Inconsolata.zip -d ~/.local/share/fonts
-rm -rf inconsolata.zip
+for font in "https://github.com/wylu1037/google-sans-code-nerd-font/releases/latest/download/google-sans-code-nerd-font.zip" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Inconsolata.zip"
+do
+    echo "Fetching $font"
+    filename=$(echo "$font" | awk -F'/' '{print $NF}')
+    wget $font -O $filename
+    unzip $filename -d ~/.local/share/fonts
+    rm -rf $filename
 fc-cache -fv
 echo "done!"
