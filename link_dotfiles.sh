@@ -1,30 +1,37 @@
 #!/bin/bash
 
-DIRECTORY=$1
+set -euo pipefail
+
+DIRECTORY=${1:-}
 
 function syncDotfiles() {
-    FILES="$(ls -a $DIRECTORY)"
-    echo $FILES
-    for f in $FILES; do
-        if [[ $f == ".." || $f == "." ]]; then
-            echo "Skipping folder navigation"
-        elif [[ -d $DIRECTORY/$f ]]; then
-            echo "Directory $f, skipping"
+    shopt -s dotglob nullglob
+    for f in "$DIRECTORY"/*; do
+        base=$(basename "$f")
+        if [[ -d $f ]]; then
+            echo "Directory $base, skipping"
         else
-            ln -s $DIRECTORY/$f $HOME/$f
-            echo "Linked $f"
+            ln -sf "$f" "$HOME/$base"
+            echo "Linked $base"
         fi
     done
+    shopt -u dotglob nullglob
 }
 
 function syncNeovimRGAndZsh() {
     if [[ ! -d $HOME/.config ]]; then
-        mkdir -p $HOME/.config
+        mkdir -p "$HOME/.config"
     fi
-    ln -s $DIRECTORY/nvim $HOME/.config/nvim
-    ln -s $DIRECTORY/ripgrep $HOME/.config/ripgrep
-    ln -s $DIRECTORY/zsh $HOME/.zsh
+    ln -sfn "$DIRECTORY/nvim" "$HOME/.config/nvim"
+    ln -sfn "$DIRECTORY/ripgrep" "$HOME/.config/ripgrep"
+    ln -sfn "$DIRECTORY/zsh" "$HOME/.zsh"
 }
+
+function setupCompletion() {
+    ln -sf "$DIRECTORY/zsh/.zshrc" "$HOME/.zshrc"
+    ln -sf "$DIRECTORY/zsh/.zshenv" "$HOME/.zshenv"
+}
+
 if [[ -z $DIRECTORY ]]; then
     echo "Valid directory of dotfiles must be provided
 Using Default directory of $HOME/Documents/code/dotfiles"
@@ -32,20 +39,14 @@ Using Default directory of $HOME/Documents/code/dotfiles"
 fi
 echo "Using dotfiles in $DIRECTORY"
 
-read -n 1 -p "This may overwrite existing files in your home directory. Are you sure? (y/n) " confirm
+read -r -n 1 -p "This may overwrite existing files in your home directory. Are you sure? (y/n) " confirm
+echo
 if [[ $confirm =~ ^[Yy]$ ]]; then
     syncDotfiles
     syncNeovimRGAndZsh
     setupCompletion
 else
     exit 2
-fi;
+fi
 
-function setupCompletion() {
-    ln -s $DIRECTORY/zsh/.zshenv ~/.zshenv
-}
-
-unset syncDotFiles;
-unset syncNeovimRGAndZsh;
-unset setupCompletion
-
+unset -f syncDotfiles syncNeovimRGAndZsh setupCompletion

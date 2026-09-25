@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 SKIP=''
 
@@ -8,6 +8,10 @@ while getopts "s" o; do
 case $o in
     s)
         SKIP="true"
+        ;;
+    *)
+        echo "Usage: new_computer.sh [-s]  (-s skips the Homebrew/clone/bundle prelude)"
+        exit 2
         ;;
     esac
 done
@@ -21,6 +25,14 @@ if [[ -z $SKIP ]]; then
 # Homebrew
   echo "===> Install Homebrew and brewing Git"
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+  # Put brew on PATH for the rest of this script (Apple Silicon, then Intel fallback).
+  if [[ -x /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [[ -x /usr/local/bin/brew ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
+
   brew install git
 
   git clone https://github.com/gallor/scripts.git
@@ -32,7 +44,8 @@ fi
 
 echo "===> Linking Dotfiles"
 chmod +x ~/Documents/code/scripts/link_dotfiles.sh
-. ~/Documents/code/scripts/link_dotfiles.sh ~/Documents/code/dotfiles
+# Run as a subprocess so a declined prompt (exit 2) doesn't abort this script.
+bash ~/Documents/code/scripts/link_dotfiles.sh ~/Documents/code/dotfiles
 
 echo "===> Installing VimPlug"
 # Vim Plug
@@ -42,18 +55,56 @@ pip3 install pynvim
 
 # Antidote
 echo "===> Installing Antidote"
-git clone --depth=1 https://github.com/mattmc3/antidote.git ${ZDOTDIR:-~}/.antidote
+git clone --depth=1 https://github.com/mattmc3/antidote.git "${ZDOTDIR:-$HOME}/.antidote"
 
-echo "Installing Micromamba, conda, condax, and pipx"
-mkdir -f ~/.local/bin
-curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
-./micromamba shell init -s zsh -r ~/micromamba
-source ~/.zshrc
-echo "conda_executable: \"$HOME/.local/bin/micromamba\"" > $HOME/.condaxrc
-micromamba create -y -n condax-toolenv condax -c conda-forge
-echo -e '#!/bin/bash\micromamba run -n condax-toolenv condax $@' > ~/.local/bin/condax && chmod +x ~/.local/bin/condax
+echo "===> Installing Node via asdf"
+# asdf is installed via the Brewfile; it manages node/yarn/bun with versions pinned
+# in the dotfiles' ~/.tool-versions (linked above). Mirrors linux_box_setup.sh so the
+# mac and linux boxes share one toolchain manager.
+export ASDF_DATA_DIR="$HOME/.asdf"
+export PATH="${ASDF_DATA_DIR}/shims:$PATH"
+if command -v asdf >/dev/null 2>&1; then
+  asdf plugin add nodejs || true
+  asdf plugin add yarn || true
+  asdf plugin add bun || true
+  # Prefer the pinned ~/.tool-versions (from dotfiles); otherwise grab latest node.
+  if [[ -f "$HOME/.tool-versions" ]]; then
+    asdf install
+  else
+    asdf install nodejs latest && asdf set -u nodejs latest
+  fi
+  asdf reshim
+else
+  echo "!! asdf not found on PATH; skipping node/yarn/bun (did brew bundle run?)"
+fi
+
+echo "===> Installing Micromamba"
+# Micromamba (standalone conda-env manager; no miniconda/base Python required).
+export MAMBA_ROOT_PREFIX="${HOME}/micromamba"
+mkdir -p ~/.local/bin
+# Auto-detects platform via uname (Darwin-arm64 / Darwin-x86_64).
+curl -Ls "https://micro.mamba.pm/api/micromamba/$(uname)-$(uname -m)/latest" \
+  | tar -xj -C ~/.local/bin --strip-components=1 bin/micromamba
+export MAMBA_EXE="${HOME}/.local/bin/micromamba"
+# Persist shell init for future zsh sessions, then load into this shell.
+"$MAMBA_EXE" shell init -s zsh -r "$MAMBA_ROOT_PREFIX"
+# shellcheck source=/dev/null
+eval "$("$MAMBA_EXE" shell hook -s posix)"
+
+# pipx lives in the (empty) base env; micromamba has no default packages.
+"$MAMBA_EXE" install -y -n base -c conda-forge pipx
+# Function (not alias) so it works in this non-interactive script.
+pipx() { "$MAMBA_EXE" run -n base pipx "$@"; }
+
+echo "===> Installing condax + conda"
+# condax lives in its own micromamba env, exposed via a thin wrapper on PATH.
+# (.condaxrc is provided by the dotfiles and points condax at micromamba.)
+"$MAMBA_EXE" create -y -n condax-toolenv condax -c conda-forge
+printf '#!/bin/bash\n%s run -n condax-toolenv condax "$@"\n' "$MAMBA_EXE" > ~/.local/bin/condax
+chmod +x ~/.local/bin/condax
 condax install conda
-conda install -y -n base conda-build
+# conda-build (enables `conda build`) lives inside the condax-managed conda env.
+condax inject conda conda-build
 condax install cruft -c conda-forge
 condax install pre-commit -c conda-forge
 condax install rattler-build
@@ -63,6 +114,8 @@ echo "===> Install Nvim Plugins"
 # Install Nvim Plugins
 npm install -g neovim
 npm install -g instant-markdown-d
+# Regenerate asdf shims so the new global node bins resolve on PATH.
+command -v asdf >/dev/null 2>&1 && asdf reshim nodejs
 nvim -c PlugInstall -c q -c q
 nvim -c UpdateRemotePlugins -c q
 
@@ -71,6 +124,11 @@ echo "===> Installing Inconsolata Nerd Font"
 wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Inconsolata.zip -O Inconsolata.zip
 unzip Inconsolata.zip -d ~/Library/Fonts
 rm -rf Inconsolata.zip
+
+echo "===> Installing Fira Code Nerd Font"
+wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip -O FiraCode.zip
+unzip FiraCode.zip -d ~/Library/Fonts
+rm -rf FiraCode.zip
 
 echo "===> Downloading Dracula for ITerm"
 wget https://github.com/dracula/iterm/archive/refs/heads/master.zip -O ~/Desktop/Dracula.zip
@@ -94,11 +152,8 @@ echo "c.TerminalInteractiveShell.editing_mode = 'vi'" >> ~/.ipython/profile_defa
 
 echo "===> Installing Tmux Plugins"
 if [[ ! -d ~/.tmux/plugins/tpm ]]; then
-  mkdir -p ~/.tmux/plugins/tpm
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 fi
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
 echo "===> Installing Rust"
 curl https://sh.rustup.rs -sSf | sh
-
-source ~/.zshrc

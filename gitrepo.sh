@@ -1,12 +1,14 @@
 #! /bin/bash
 
+set -uo pipefail
+
 repo=""
 zip=""
 filter=""
 tar=""
 
 _usage=$(cat <<EOF
-Usage: gitrepo -r <repo author/repo name> [-f] <filter> [-z] [-t]
+Usage: gitrepo -r <repo author/repo name> [-f <filter>] [-z] [-t]
 ---
 -r      Repo owner/name (ie awesomeauthorsname/greatrepo)
 -f      Filter applied to the list of the repo's asset names.
@@ -18,12 +20,12 @@ EOF
 
 _prereqs="Script relies on Fzf for selection. Please install before continuing"
 
-if [[ -z $(which fzf) ]]; then
-    echo $_prereqs
+if [[ -z $(command -v fzf) ]]; then
+    echo "$_prereqs"
     exit 2
 fi
 
-while getopts ":r:ftz:" o; do
+while getopts ":r:f:tz" o; do
 case $o in
     z)
         zip=true
@@ -45,28 +47,29 @@ done
 
 if [[ -z $repo ]]; then
     echo "$_usage"
+    exit 2
 fi
 
-releases=$(curl -s https://api.github.com/repos/$repo/releases/latest)
-assets_length=$(echo $releases | jq '.assets | length')
+releases=$(curl -s "https://api.github.com/repos/$repo/releases/latest")
+assets_length=$(echo "$releases" | jq '.assets | length')
 
 if [[ -n $zip ]]; then
-    wget $(echo $releases | jq -r '.zipball_url')
+    wget "$(echo "$releases" | jq -r '.zipball_url')"
 fi
 
 if [[ -n $tar ]]; then
-    wget $(echo $releases | jq -r '.tarball_url')
+    wget "$(echo "$releases" | jq -r '.tarball_url')"
 fi
 
 if [[ $assets_length -gt 0 ]]; then
 
     if [[ -z $filter ]]; then
-        name=$(echo $releases | jq -r '.assets[] | .name' | fzf)
+        name=$(echo "$releases" | jq -r '.assets[] | .name' | fzf)
     else
-        name=$(echo $releases | jq -r --arg filter "$filter" '.assets[] | select(.name | contains($filter)) | .name' | fzf)
+        name=$(echo "$releases" | jq -r --arg filter "$filter" '.assets[] | select(.name | contains($filter)) | .name' | fzf)
     fi
     if [[ -n $name ]]; then
-        wget -q --show-progress --content-disposition $(echo $releases | jq -r --arg name "$name" '.assets[] | select(.name | contains($name)) | .browser_download_url')
+        wget -q --show-progress --content-disposition "$(echo "$releases" | jq -r --arg name "$name" '.assets[] | select(.name == $name) | .browser_download_url')"
         exit 0
     else
         echo "No name specified. Canceling download"

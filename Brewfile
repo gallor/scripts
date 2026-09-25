@@ -55,6 +55,11 @@ brew "tty-clock"
 brew "wget"
 brew "yarn"
 brew "yt-dlp"
+brew "docker-compose"
+cask "google-chrome"
+cask "google-drive"
+cask "autodesk-fusion", args: { appdir: "~/Applications" }
+cask "appcleaner", args: { appdir: "~/Applications" }
 cask "bettertouchtool", args: { appdir: "~/Applications" }
 cask "dash3", args: { appdir: "~/Applications" }
 cask "notion", args: { appdir: "~/Applications" }
