@@ -35,8 +35,8 @@ if [[ -z $SKIP ]]; then
 
   brew install git
 
-  git clone https://github.com/gallor/scripts.git
-  git clone https://github.com/gallor/dotfiles.git
+  [[ -d scripts ]] || git clone https://github.com/gallor/scripts.git
+  [[ -d dotfiles ]] || git clone https://github.com/gallor/dotfiles.git
   cd ~/Documents/code/scripts
   brew bundle
   brew upgrade
@@ -55,7 +55,7 @@ pip3 install pynvim
 
 # Antidote
 echo "===> Installing Antidote"
-git clone --depth=1 https://github.com/mattmc3/antidote.git "${ZDOTDIR:-$HOME}/.antidote"
+[[ -d "${ZDOTDIR:-$HOME}/.antidote" ]] || git clone --depth=1 https://github.com/mattmc3/antidote.git "${ZDOTDIR:-$HOME}/.antidote"
 
 echo "===> Installing Node via asdf"
 # asdf is installed via the Brewfile; it manages node/yarn/bun with versions pinned
