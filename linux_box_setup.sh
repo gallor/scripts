@@ -153,9 +153,23 @@ fi
 
 echo "==> Setting zsh as the default shell"
 if command -v zsh >/dev/null 2>&1; then
-    run_step "chsh to zsh" chsh -s "$(command -v zsh)"
+    zsh_path="$(command -v zsh)"
+    login_user="$(id -un)"
+    current_shell="$(getent passwd "$login_user" | cut -d: -f7)"
+    if [[ "$current_shell" == */zsh ]]; then
+        echo "Login shell already zsh (${current_shell}); nothing to do."
+    elif grep -q "^${login_user}:" /etc/passwd; then
+        # Local account: chsh can edit /etc/passwd.
+        run_step "chsh to zsh" chsh -s "$zsh_path"
+    else
+        # Directory-managed user (SSSD/AD/LDAP): chsh only edits local /etc/passwd, so it
+        # cannot set the shell here -- the login shell comes from the directory record.
+        echo "!! ${login_user} is directory-managed (not in /etc/passwd); chsh cannot set the shell." | tee -a "$SETUP_LOG"
+        echo "   Current login shell: '${current_shell}'. Set loginShell in the directory (ask IT)," | tee -a "$SETUP_LOG"
+        echo "   or add 'exec zsh -l' to ~/.bash_profile to switch into zsh on login." | tee -a "$SETUP_LOG"
+    fi
 else
-    echo "!! Skipping chsh (zsh not installed)" | tee -a "$SETUP_LOG"
+    echo "!! Skipping zsh default shell (zsh not installed)" | tee -a "$SETUP_LOG"
 fi
 
 # ---------------------------------------------------------------------------
