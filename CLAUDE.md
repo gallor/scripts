@@ -36,9 +36,15 @@ Supporting pieces:
   from `new_computer.sh`). Edit this to change what a macOS box installs.
 - `link_dotfiles.sh` — symlinks dotfiles into `$HOME`. Takes the dotfiles dir as `$1`
   (defaults to `~/Documents/code/dotfiles`). Top-level files are symlinked into `$HOME`;
-  the `nvim`, `ripgrep`, and `zsh` directories are special-cased into `~/.config` / `~/.zsh`.
+  the `ripgrep` and `zsh` directories are special-cased into `~/.config` / `~/.zsh`.
+  Neovim is deliberately NOT linked here — the nvim config is the separate
+  `gallor/kickstart.nvim` fork (lazy.nvim, Lua), which the setup scripts clone and
+  symlink to `~/.config/nvim` themselves.
   **Depends on the separate `gallor/dotfiles` repo** — that repo's layout (a `zsh/.zshrc`,
-  `nvim/`, `ripgrep/` dirs) is an implicit contract this script relies on.
+  `ripgrep/` dir) is an implicit contract this script relies on.
+- Neovim config lives in the **`gallor/kickstart.nvim`** repo (branch `personal-updates`),
+  not the dotfiles repo. `new_computer.sh`/`linux_box_setup.sh` clone it and run
+  `nvim --headless "+Lazy! sync" +qa`; there is no vim-plug anymore.
 - `gitrepo.sh` — unrelated standalone utility (not part of box setup): fetches a GitHub
   repo's latest release, uses `fzf` to pick an asset (optionally `-f` filtered), and
   `wget`s it. `-z`/`-t` grab the zipball/tarball instead. Requires `fzf` and `jq`.

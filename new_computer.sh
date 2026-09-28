@@ -47,11 +47,13 @@ chmod +x ~/Documents/code/scripts/link_dotfiles.sh
 # Run as a subprocess so a declined prompt (exit 2) doesn't abort this script.
 bash ~/Documents/code/scripts/link_dotfiles.sh ~/Documents/code/dotfiles
 
-echo "===> Installing VimPlug"
-# Vim Plug
-sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
-       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-pip3 install pynvim
+echo "===> Installing kickstart.nvim"
+# Config: clone the kickstart fork and point ~/.config/nvim at it (lazy.nvim manages plugins).
+if [[ ! -d ~/Documents/code/kickstart.nvim ]]; then
+  git clone -b personal-updates https://github.com/gallor/kickstart.nvim.git ~/Documents/code/kickstart.nvim
+fi
+mkdir -p ~/.config
+ln -sfn ~/Documents/code/kickstart.nvim ~/.config/nvim
 
 # Antidote
 echo "===> Installing Antidote"
@@ -110,14 +112,13 @@ condax install pre-commit -c conda-forge
 condax install rattler-build
 condax install pipx -c conda-forge
 
-echo "===> Install Nvim Plugins"
-# Install Nvim Plugins
+echo "===> Installing Nvim providers + plugins"
+# Optional node provider for :checkhealth (kickstart works without it).
 npm install -g neovim
-npm install -g instant-markdown-d
 # Regenerate asdf shims so the new global node bins resolve on PATH.
 command -v asdf >/dev/null 2>&1 && asdf reshim nodejs
-nvim -c PlugInstall -c q -c q
-nvim -c UpdateRemotePlugins -c q
+# Install plugins headlessly via lazy.nvim.
+nvim --headless "+Lazy! sync" +qa
 
 echo "===> Installing Inconsolata Nerd Font"
 # Nerd Font

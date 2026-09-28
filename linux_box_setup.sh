@@ -49,14 +49,13 @@ if run_step "apt update" sudo apt update; then
         curl \
         ca-certificates \
         gnupg \
+        software-properties-common \
         zsh \
         bat \
         fd-find \
         git-all \
         git-lfs \
-        virtualbox \
         trash-cli \
-        vagrant \
         openssh-server \
         ripgrep \
         shellcheck \
@@ -84,6 +83,29 @@ run_step "git lfs install" git lfs install
 
 # eza is only in the Ubuntu repos on 23.10+; isolate so a miss on 22.04 just logs.
 run_step "apt install eza (unavailable pre-24.04)" sudo apt install -y eza
+
+# ---------------------------------------------------------------------------
+# VM tooling: VirtualBox (multiverse) + Vagrant (HashiCorp apt repo)
+# Kept OUT of the base batch: apt install is all-or-nothing, so a package with no
+# candidate (vagrant was dropped from Ubuntu repos on 24.04+; virtualbox needs the
+# multiverse component) would abort the whole batch. Isolated here as best-effort.
+# ---------------------------------------------------------------------------
+echo "==> Installing VirtualBox"
+if run_step "Enable multiverse" sudo add-apt-repository -y multiverse; then
+    run_step "apt update (multiverse)" sudo apt-get update
+fi
+run_step "Install VirtualBox" sudo apt install -y virtualbox
+
+echo "==> Installing Vagrant"
+# shellcheck disable=SC2016  # $() and $VERSION_CODENAME are meant to run in the child shell, not expand now
+if run_step "Set up HashiCorp apt repo" bash -c '
+    sudo install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/hashicorp.gpg
+    sudo chmod a+r /etc/apt/keyrings/hashicorp.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $(. /etc/os-release && echo "$VERSION_CODENAME") main" | sudo tee /etc/apt/sources.list.d/hashicorp.list > /dev/null
+    sudo apt-get update'; then
+    run_step "Install Vagrant" sudo apt install -y vagrant
+fi
 
 # ---------------------------------------------------------------------------
 # GitHub CLI (gh)  -- official apt repo (keyring + repo, like Docker below)
@@ -221,6 +243,8 @@ fi
 
 # ---------------------------------------------------------------------------
 # Global npm packages (needs asdf node on PATH)
+# Note: the `neovim` package is the Node remote-plugin host (neovim-node-host),
+# NOT the editor (that's the snap/appimage below) -- it's the Node analog of pynvim.
 # ---------------------------------------------------------------------------
 if command -v npm >/dev/null 2>&1; then
     for pkg in neovim instant-markdown-d @openai/codex typescript typescript-language-server wscat; do
@@ -241,7 +265,8 @@ if run_step "Install rustup" bash -c "curl --proto '=https' --tlsv1.2 -sSf https
     [[ -s "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
     if command -v cargo >/dev/null 2>&1; then
         run_step "cargo install tree-sitter-cli" cargo install tree-sitter-cli
-        run_step "cargo install pqrs" cargo install pqrs
+        # NOTE: pqrs dropped -- it currently fails to build (arrow-arith 51 vs
+        # chrono 0.4.45 `quarter` method clash). Re-add if upstream bumps arrow.
     fi
 fi
 
@@ -255,8 +280,9 @@ fi
 [[ -x ~/.fzf/install ]] && run_step "Run fzf install" ~/.fzf/install --all
 
 # ---------------------------------------------------------------------------
-# Neovim -> plug + PlugInstall + remote plugins
-# Chain: PlugInstall only if nvim is present.
+# Neovim -> kickstart.nvim (lazy.nvim). The editor is installed via snap/appimage;
+# the config is the gallor/kickstart.nvim fork symlinked to ~/.config/nvim, and
+# plugins are installed by lazy.nvim (no vim-plug).
 # ---------------------------------------------------------------------------
 echo "==> Installing Neovim"
 if command -v snap >/dev/null 2>&1; then
@@ -267,14 +293,24 @@ else
         run_step "Install neovim appimage" sudo mv nvim.appimage /usr/local/bin/nvim
     fi
 fi
-sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
-     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-run_step "pip pynvim" pip3 install --user pynvim
+
+# Optional Python provider for :checkhealth (kickstart works without it).
+# --break-system-packages: Ubuntu's system python3 is PEP 668 externally-managed;
+# --user keeps this in ~/.local, so it never touches system site-packages.
+run_step "pip pynvim" pip3 install --user --break-system-packages pynvim
+
+# Config: clone the kickstart fork and point ~/.config/nvim at it.
+if [[ ! -d "$CODE_DIR/kickstart.nvim" ]]; then
+    run_step "Clone kickstart.nvim" git clone -b personal-updates https://github.com/gallor/kickstart.nvim.git "$CODE_DIR/kickstart.nvim"
+fi
+mkdir -p ~/.config
+ln -sfn "$CODE_DIR/kickstart.nvim" ~/.config/nvim
+
+# Install plugins headlessly via lazy.nvim.
 if command -v nvim >/dev/null 2>&1; then
-    run_step "nvim PlugInstall" nvim --headless +PlugInstall +q
-    run_step "nvim UpdateRemotePlugins" nvim --headless +UpdateRemotePlugins +q
+    run_step "lazy.nvim sync" nvim --headless "+Lazy! sync" +qa
 else
-    echo "!! Skipping PlugInstall (nvim not installed)" | tee -a "$SETUP_LOG"
+    echo "!! Skipping lazy.nvim sync (nvim not installed)" | tee -a "$SETUP_LOG"
 fi
 
 # ---------------------------------------------------------------------------

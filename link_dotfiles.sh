@@ -22,7 +22,6 @@ function syncNeovimRGAndZsh() {
     if [[ ! -d $HOME/.config ]]; then
         mkdir -p "$HOME/.config"
     fi
-    ln -sfn "$DIRECTORY/nvim" "$HOME/.config/nvim"
     ln -sfn "$DIRECTORY/ripgrep" "$HOME/.config/ripgrep"
     ln -sfn "$DIRECTORY/zsh" "$HOME/.zsh"
 }
