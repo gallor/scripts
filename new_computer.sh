@@ -144,7 +144,9 @@ echo ""
 echo "===> Installing Pydoro"
 # Global Pip Packages
 pipx install pydoro
-pip3 install "pydoro[audio]"
+# --break-system-packages: brew/system python3 is PEP 668 externally-managed;
+# --user keeps this in ~/.local so it never touches system site-packages.
+pip3 install --user --break-system-packages "pydoro[audio]"
 
 echo "===> Installing iPython"
 pipx install ipython
