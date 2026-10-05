@@ -339,6 +339,9 @@ if [[ $docker_repo_ok -eq 0 ]]; then
     if run_step "Install Docker packages" sudo apt-get install -y \
         docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; then
         run_step "Docker hello-world" sudo docker run hello-world
+
+        echo "Adding the current user to the docker account to remove the need for sudo"
+        sudo usermod -aG docker $USER
     fi
 else
     echo "!! Skipping Docker install (repo setup failed)" | tee -a "$SETUP_LOG"
