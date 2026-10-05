@@ -343,6 +343,15 @@ if [[ $docker_repo_ok -eq 0 ]]; then
 else
     echo "!! Skipping Docker install (repo setup failed)" | tee -a "$SETUP_LOG"
 fi
+#
+# ---------------------------------------------------------------------------
+# KuebCtl
+# ---------------------------------------------------------------------------
+echo "==> Instally Kubectl"
+cd $HOME
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+rm -f kubectl
 
 # ---------------------------------------------------------------------------
 # DuckDB CLI (independent)
@@ -390,3 +399,5 @@ if [[ -s "$SETUP_LOG" ]]; then
     echo "Some steps failed. See $SETUP_LOG:"
     cat "$SETUP_LOG"
 fi
+
+
