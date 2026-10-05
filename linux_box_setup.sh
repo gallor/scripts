@@ -357,6 +357,33 @@ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 rm -f kubectl
 
 # ---------------------------------------------------------------------------
+# minikube (local Kubernetes) -- depends on the Docker install above for its
+# default driver. Install the binary, then start a cluster once so the generated
+# kube context has real certs: a stale `minikube` context whose certs are missing
+# makes `kubectl config view` (run by kube_config in ~/.extra) write to stderr
+# during zsh init, which trips Powerlevel10k's instant prompt.
+# ---------------------------------------------------------------------------
+echo "==> Installing minikube"
+case "$(uname -m)" in
+    x86_64|amd64) MINIKUBE_ARCH="amd64" ;;
+    aarch64|arm64) MINIKUBE_ARCH="arm64" ;;
+    *) MINIKUBE_ARCH="amd64" ;;
+esac
+if run_step "Download minikube" curl -fL -o /tmp/minikube \
+    "https://storage.googleapis.com/minikube/releases/latest/minikube-linux-${MINIKUBE_ARCH}"; then
+    run_step "Install minikube" sudo install -o root -g root -m 0755 /tmp/minikube /usr/local/bin/minikube
+    rm -f /tmp/minikube
+    # Start a cluster via `sg docker` so the docker group added just above is
+    # active without a re-login. Best-effort: if docker isn't usable yet the
+    # binary is still installed and `minikube start` can be re-run after login.
+    if command -v minikube >/dev/null 2>&1 && command -v docker >/dev/null 2>&1; then
+        run_step "minikube start (docker driver)" sg docker -c "minikube start --driver=docker"
+    else
+        echo "!! Skipping minikube start (minikube or docker not available)" | tee -a "$SETUP_LOG"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
 # DuckDB CLI (independent)
 # ---------------------------------------------------------------------------
 echo "==> Installing DuckDB"
